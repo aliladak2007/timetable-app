@@ -4,13 +4,17 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $backendDir = Join-Path $repoRoot "backend"
 $distDir = Join-Path $backendDir "dist"
 
+$targetTriple = "x86_64-pc-windows-msvc"
+$sidecarName = "backend-sidecar-$targetTriple"
+
 Push-Location $backendDir
 try {
   py -m PyInstaller `
     --noconfirm `
     --clean `
-    --name backend-sidecar `
+    --name $sidecarName `
     --onefile `
+    --noconsole `
     --hidden-import app.models `
     --collect-all pydantic `
     --collect-all pydantic_settings `
@@ -20,4 +24,4 @@ finally {
   Pop-Location
 }
 
-Write-Host "Backend sidecar built at $distDir"
+Write-Host "Backend sidecar built at $distDir\$sidecarName.exe"

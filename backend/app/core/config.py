@@ -6,6 +6,31 @@ from pydantic import Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+DEFAULT_DEV_CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+DEFAULT_DESKTOP_CORS_ORIGINS = [
+    "tauri://localhost",
+    "null",
+    "http://tauri.localhost",
+    "https://tauri.localhost",
+]
+
+
+def _dedupe_origins(origins: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for origin in origins:
+        normalized = origin.strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        result.append(normalized)
+    return result
+
+
 def _read_secret_from_file(path: str | None) -> str | None:
     if not path:
         return None
@@ -29,7 +54,10 @@ class Settings(BaseSettings):
     auth_token_ttl_minutes: int = 60
     login_rate_limit_attempts: int = 5
     login_rate_limit_window_seconds: int = 300
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"])
+    cors_debug_logging: bool = False
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [*DEFAULT_DEV_CORS_ORIGINS]
+    )
     jwt_secret: str | None = None
     jwt_secret_file: str | None = None
     calendar_token_secret: str | None = None
@@ -52,6 +80,19 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env.lower() in {"production", "desktop"}
+
+    @property
+    def resolved_cors_origins(self) -> list[str]:
+        configured_origins = _dedupe_origins(self.cors_origins)
+        if self.app_env.lower() == "desktop":
+            return _dedupe_origins(
+                [
+                    *DEFAULT_DESKTOP_CORS_ORIGINS,
+                    *DEFAULT_DEV_CORS_ORIGINS,
+                    *configured_origins,
+                ]
+            )
+        return configured_origins or [*DEFAULT_DEV_CORS_ORIGINS]
 
     def _ensure_secret(self, supplied: str | None, file_path: str | None, filename: str) -> str:
         if supplied:
@@ -85,6 +126,4 @@ def get_settings() -> Settings:
     settings.expose_docs = settings.expose_docs and not settings.is_production
     if settings.app_env.lower() == "desktop":
         settings.auto_create_schema = True
-    if settings.is_production and not settings.cors_origins:
-        settings.cors_origins = ["tauri://localhost"]
     return settings

@@ -30,6 +30,27 @@ logger = logging.getLogger("timetabling")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
+class RawPreflightLoggingMiddleware:
+    def __init__(self, app, *, enabled: bool):
+        self.app = app
+        self.enabled = enabled
+
+    async def __call__(self, scope, receive, send):
+        if self.enabled and scope["type"] == "http" and scope["method"] == "OPTIONS":
+            headers = {
+                key.decode("latin-1").lower(): value.decode("latin-1")
+                for key, value in scope.get("headers", [])
+            }
+            logger.info(
+                "PRE-CORS OPTIONS %s origin=%s acr-method=%s acr-headers=%s",
+                scope.get("path"),
+                headers.get("origin"),
+                headers.get("access-control-request-method"),
+                headers.get("access-control-request-headers"),
+            )
+        await self.app(scope, receive, send)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     if settings.auto_create_schema:
@@ -43,23 +64,22 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-app = FastAPI(
+fastapi_app = FastAPI(
     title=settings.app_name,
     lifespan=lifespan,
     docs_url="/docs" if settings.expose_docs else None,
     redoc_url="/redoc" if settings.expose_docs else None,
     openapi_url="/openapi.json" if settings.expose_docs else None,
 )
-app.add_middleware(
+fastapi_app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=settings.resolved_cors_origins,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
-
-@app.middleware("http")
+@fastapi_app.middleware("http")
 async def security_middleware(request: Request, call_next):
     content_length = request.headers.get("content-length")
     if content_length and int(content_length) > settings.request_size_limit_bytes:
@@ -73,24 +93,26 @@ async def security_middleware(request: Request, call_next):
     return response
 
 
-@app.exception_handler(RequestValidationError)
+@fastapi_app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
     errors = [f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}" for error in exc.errors()]
     return JSONResponse(status_code=422, content={"detail": errors})
 
 
-@app.exception_handler(IntegrityError)
+@fastapi_app.exception_handler(IntegrityError)
 async def integrity_exception_handler(_: Request, __: IntegrityError) -> JSONResponse:
     return JSONResponse(status_code=409, content={"detail": "Request violates a database constraint."})
 
 
-app.include_router(health_router, prefix=settings.api_prefix)
-app.include_router(auth_router, prefix=settings.api_prefix)
-app.include_router(dashboard_router, prefix=settings.api_prefix)
-app.include_router(audit_router, prefix=settings.api_prefix)
-app.include_router(exports_router, prefix=settings.api_prefix)
-app.include_router(teachers_router, prefix=settings.api_prefix)
-app.include_router(students_router, prefix=settings.api_prefix)
-app.include_router(sessions_router, prefix=settings.api_prefix)
-app.include_router(matches_router, prefix=settings.api_prefix)
-app.include_router(scheduling_router, prefix=settings.api_prefix)
+fastapi_app.include_router(health_router, prefix=settings.api_prefix)
+fastapi_app.include_router(auth_router, prefix=settings.api_prefix)
+fastapi_app.include_router(dashboard_router, prefix=settings.api_prefix)
+fastapi_app.include_router(audit_router, prefix=settings.api_prefix)
+fastapi_app.include_router(exports_router, prefix=settings.api_prefix)
+fastapi_app.include_router(teachers_router, prefix=settings.api_prefix)
+fastapi_app.include_router(students_router, prefix=settings.api_prefix)
+fastapi_app.include_router(sessions_router, prefix=settings.api_prefix)
+fastapi_app.include_router(matches_router, prefix=settings.api_prefix)
+fastapi_app.include_router(scheduling_router, prefix=settings.api_prefix)
+
+app = RawPreflightLoggingMiddleware(fastapi_app, enabled=settings.cors_debug_logging)

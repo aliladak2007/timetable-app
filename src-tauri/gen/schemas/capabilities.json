@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Desktop capability set limited to the packaged backend sidecar.","local":true,"windows":["main"],"permissions":["core:default","shell:allow-execute"]}}

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import uvicorn
+from app.main import app
 
 
 def configure_logging() -> None:
@@ -25,7 +26,7 @@ def main() -> None:
     os.environ.setdefault("TIMETABLING_APP_ENV", "desktop")
     host = os.getenv("TIMETABLING_HOST", "127.0.0.1")
     port = int(os.getenv("TIMETABLING_PORT", "8000"))
-    uvicorn.run("app.main:app", host=host, port=port, log_level="info")
+    uvicorn.run(app, host=host, port=port, log_level="info")
 
 
 if __name__ == "__main__":

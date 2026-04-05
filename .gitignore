@@ -1,22 +1,79 @@
+# -------------------------
+
+# Environment variables
+
+# -------------------------
+
 .env
+
+# -------------------------
+
+# Python
+
+# -------------------------
+
+**pycache**/
+*.py[cod]
+*.pyd
+.venv/
+.pytest_cache/
+
+# -------------------------
+
+# Backend (Python)
+
+# -------------------------
+
+backend/**pycache**/
 backend/.runtime/
 backend/dist/
 backend/build/
 backend/*.spec
-backend/__pycache__/
-backend/.pytest_cache/
+backend/*.db
+
+# -------------------------
+
+# Frontend (Next.js / Node)
+
+# -------------------------
+
+node_modules/
+frontend/node_modules/
+.next/
 frontend/.next/
 frontend/out/
-frontend/node_modules/
-src-tauri/target/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.venv/
-.env
-backend/timetabling.db
-frontend/.next/
-node_modules/
+
+# -------------------------
+
+# Build / Distribution
+
+# -------------------------
+
 dist/
 build/
+
+# -------------------------
+
+# Tauri / Rust
+
+# -------------------------
+
+src-tauri/target/
+target/
+
+# -------------------------
+
+# Databases
+
+# -------------------------
+
+*.db
+
+# -------------------------
+
+# OS / System files
+
+# -------------------------
+
+.DS_Store
+Thumbs.db

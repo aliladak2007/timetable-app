@@ -78,6 +78,7 @@ async fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), Stri
         .sidecar("backend-sidecar")
         .map_err(|err| err.to_string())?
         .env("TIMETABLING_APP_ENV", "desktop")
+        .env("TIMETABLING_CORS_DEBUG_LOGGING", "true")
         .env("TIMETABLING_HOST", "127.0.0.1")
         .env("TIMETABLING_PORT", port.to_string())
         .env("TIMETABLING_CONFIG_DIR", data_dir.to_string_lossy().to_string())
@@ -115,10 +116,13 @@ async fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), Stri
 
 fn shutdown_backend(state: &BackendState) {
     if let Ok(mut slot) = state.child.lock() {
-        if let Some(child) = slot.as_mut() {
+        if let Some(child) = slot.take() {
             let _ = child.kill();
         }
-        *slot = None;
+    }
+
+    if let Ok(mut api_slot) = state.api_base_url.lock() {
+        *api_slot = None;
     }
 }
 
