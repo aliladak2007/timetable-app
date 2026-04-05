@@ -9,3 +9,14 @@ frontend/.next/
 frontend/out/
 frontend/node_modules/
 src-tauri/target/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env
+backend/timetabling.db
+frontend/.next/
+node_modules/
+dist/
+build/
