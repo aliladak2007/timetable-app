@@ -1,0 +1,11 @@
+.env
+backend/.runtime/
+backend/dist/
+backend/build/
+backend/*.spec
+backend/__pycache__/
+backend/.pytest_cache/
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+src-tauri/target/

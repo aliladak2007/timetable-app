@@ -1,0 +1,32 @@
+Phase 3 only.
+
+Polish the product into a serious internal tool / early SaaS prototype.
+
+Scope:
+- improve error handling
+- improve data validation
+- add migrations
+- prepare deployment
+- improve documentation
+- add audit-friendly logging for schedule changes
+- improve ranking transparency
+- add export-friendly views or CSV export if appropriate
+- improve test coverage
+- identify technical debt and fix the most important parts
+
+Deliverables:
+1. Deployment-ready local dev setup
+2. Clear README
+3. Migration strategy
+4. Better test coverage
+5. Quality pass on naming, structure, and architecture
+6. Suggested roadmap for v2 features
+
+Potential v2 ideas:
+- try multiple teachers and compare best slots
+- teacher load balancing
+- parent-facing booking confirmation
+- invoice integration
+- temporary exceptions such as holidays or one-off cancellations
+- WhatsApp or email notifications
+- recurring schedule templates

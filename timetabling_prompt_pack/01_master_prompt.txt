@@ -1,0 +1,232 @@
+You are a senior full-stack engineer and product architect.
+
+I want you to design and build an MVP for a timetabling assistant app for a tutoring centre. This is not a generic school timetable generator. It is an operational scheduling tool for assigning tutors to students and quickly finding valid slots for new students.
+
+First, understand the product properly, then create a plan, then implement in small reviewed steps.
+
+PROJECT GOAL
+Build an app that helps me:
+1. Store teacher availability
+2. Store student existing timetables
+3. Assign teachers to students
+4. When a new student is added, input their preferred times
+5. Match those preferred times against a specific teacher’s availability
+6. Exclude clashes with the teacher’s existing bookings
+7. Exclude clashes with the student’s existing commitments
+8. Return the best valid timetable options quickly
+9. Make the process significantly faster than manually checking Excel sheets
+
+CORE USER WORKFLOW
+The app should support this real-world workflow:
+- I create teacher profiles
+- For each teacher, I enter available time slots
+- I create student profiles
+- For each student, I store current timetable or unavailable times
+- I assign recurring sessions between teachers and students
+- When I want to add a new student:
+  - I choose a teacher or shortlist of teachers
+  - I enter the student’s preferred times
+  - the system suggests valid matching slots
+  - I can confirm one and create the booking
+
+PRODUCT REQUIREMENTS
+Please design for a tutoring business, not a university timetable generator.
+
+The system should support:
+- Multiple teachers
+- Multiple students
+- Weekly recurring schedules
+- Teacher availability by day and time
+- Student unavailable times or existing commitments
+- Existing booked sessions
+- Matching a student with a specific teacher
+- Optional support for trying multiple teachers and ranking results
+- Manual override by the admin
+- Clear conflict detection
+- Easy editing and deleting of sessions
+
+MVP FEATURES
+Implement these first:
+1. Teacher management
+   - add teacher
+   - edit teacher
+   - delete teacher
+   - define weekly availability slots
+
+2. Student management
+   - add student
+   - edit student
+   - delete student
+   - define preferred times
+   - define unavailable times
+
+3. Session management
+   - assign teacher to student
+   - create recurring weekly sessions
+   - edit sessions
+   - cancel sessions
+
+4. Matching engine
+   - input: selected teacher + student preferred times
+   - output: valid matching slots
+   - filter out clashes with:
+     - teacher unavailability
+     - teacher existing sessions
+     - student unavailable times
+     - student existing sessions
+   - rank matches sensibly
+
+5. Admin view
+   - see all teacher schedules
+   - see all student assignments
+   - inspect conflicts
+   - confirm a suggested slot
+
+MATCHING LOGIC
+The matching logic is central.
+
+A slot is valid if:
+- it falls inside the teacher’s available time
+- it falls inside the student’s preferred time or allowed time
+- it does not overlap any existing booked session for that teacher
+- it does not overlap any blocked or booked time for that student
+- it satisfies the requested lesson duration
+
+Please design this carefully and keep it easy to reason about.
+
+RANKING LOGIC
+For suggested slots, rank options using a transparent scoring system.
+For MVP, use something simple like:
+- exact match to preferred time scores higher
+- earlier available slot scores slightly higher
+- lower teacher fragmentation is better
+- consistent weekly slot is better
+- optionally prefer slots that keep the teacher’s timetable compact
+
+Explain the ranking logic in code comments and documentation.
+
+TECH STACK
+Choose a stack that is simple, robust, and easy for one developer to maintain.
+
+Preferred default:
+- Backend: Python with FastAPI
+- Frontend: React or Next.js
+- Database: SQLite for MVP, structured so PostgreSQL migration is easy later
+- ORM: SQLAlchemy or Prisma equivalent if using TypeScript backend
+- Styling: simple clean admin UI, prioritise usability over fancy visuals
+
+If you think a different stack is substantially better for this use case, explain why before switching.
+
+DATA MODEL
+Design a clean schema for at least:
+- Teacher
+- Student
+- AvailabilitySlot
+- StudentPreference
+- StudentBlockedTime
+- Session
+- Optional: ConflictLog or MatchSuggestion
+
+Think carefully about recurrence and weekly scheduling.
+
+TIME MODEL
+Use a weekly recurring timetable model for MVP.
+Represent time in a way that is easy to validate and compare.
+Be explicit about:
+- timezone handling
+- weekday representation
+- session duration
+- overlap detection
+
+IMPORTANT CONSTRAINTS
+- Avoid overengineering
+- Do not build a generic enterprise school ERP
+- Keep the MVP focused on tutoring-centre operations
+- Prioritise correctness of scheduling logic
+- Prioritise maintainability and readability
+- Use clean folder structure
+- Use clear comments only where they add real value
+- Include seed/demo data so I can test quickly
+- Include a few realistic example teachers, students, availabilities, and bookings
+
+UX REQUIREMENTS
+The UI should be practical for an admin who is doing timetable work quickly.
+Include at minimum:
+- teacher list and profile view
+- student list and profile view
+- weekly timetable view or simplified schedule view
+- add new student flow
+- match suggestions screen
+- conflict warnings
+- create booking flow
+
+Do not waste time on fancy animations.
+
+IMPLEMENTATION APPROACH
+Follow this exact workflow:
+1. Restate the problem in precise engineering terms
+2. Propose the system architecture
+3. Propose the database schema
+4. Propose the matching algorithm
+5. Propose API routes
+6. Propose UI screens
+7. Produce a build plan broken into phases
+8. Wait for no further clarification unless absolutely necessary
+9. Start implementing phase by phase
+10. After each phase, summarise what was built and what remains
+
+OUTPUT FORMAT
+I want you to work in the following structure:
+
+Section A. Product understanding
+Section B. Assumptions
+Section C. Architecture
+Section D. Data model
+Section E. Matching algorithm
+Section F. API design
+Section G. Frontend design
+Section H. Step-by-step implementation plan
+Section I. Actual implementation
+Section J. Testing strategy
+Section K. Future improvements
+
+CODING REQUIREMENTS
+- Generate production-style code, not toy snippets
+- Keep files modular
+- Use clear naming
+- Add validation
+- Add useful error handling
+- Include test coverage for the matching logic
+- Include at least unit tests for:
+  - overlap detection
+  - teacher availability filtering
+  - student conflict filtering
+  - recurring session collision detection
+  - ranking output
+
+DEMO REQUIREMENTS
+Include demo scenarios such as:
+- one teacher with several free slots
+- one student with limited preferences
+- existing sessions that create clashes
+- a new student who can only do two possible times
+- a result page showing the best matches
+
+DECISION RULES
+- If something is ambiguous, choose the simplest reasonable option and state the assumption
+- Do not stop at high-level design only
+- Do not give pseudo-code unless it helps before real code
+- Move from design into implementation
+- Keep momentum and avoid analysis paralysis
+
+QUALITY BAR
+I want this to feel like a serious internal tool or early SaaS prototype, not a class project.
+
+Start by producing:
+1. a concise but precise product understanding
+2. the full architecture
+3. the schema
+4. the matching algorithm design
+5. the phased implementation plan
+
+Then begin implementation.
